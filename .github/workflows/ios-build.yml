@@ -1,0 +1,53 @@
+name: Build WoW Reader iOS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'WoWReader/**'
+      - 'project.yml'
+      - '.github/workflows/ios-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Resolve Swift packages
+        run: xcodebuild -resolvePackageDependencies -project WoWReader.xcodeproj -scheme WoWReader
+
+      - name: Build iOS Simulator
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project WoWReader.xcodeproj \
+            -scheme WoWReader \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            build | xcpretty
+
+      - name: Source checks
+        run: |
+          test -s WoWReader/WoWReaderApp.swift
+          test -s WoWReader/Views/LibraryView.swift
+          test -s WoWReader/Reader/EPUBReaderView.swift
+          test -s WoWReader/Reader/PDFReaderView.swift
+          test -s WoWReader/Reader/EPUBDocument.swift
+          grep -q 'com.whisper.wowreader' project.yml
+          grep -q 'GridItem(.adaptive' WoWReader/Views/LibraryView.swift
+          grep -q 'WKWebView' WoWReader/Reader/EPUBReaderView.swift
+          grep -q 'PDFView' WoWReader/Reader/PDFReaderView.swift
+          grep -q 'unzipItem' WoWReader/Reader/EPUBDocument.swift
