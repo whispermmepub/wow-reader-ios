@@ -1,0 +1,12 @@
+# Xcode
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+
+# XcodeGen generated project
+WoWReader.xcodeproj/
+
+# Swift Package Manager
+.build/
+.swiftpm/
