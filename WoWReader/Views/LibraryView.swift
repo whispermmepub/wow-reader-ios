@@ -24,7 +24,7 @@ struct LibraryView: View {
             .navigationBarTitleDisplayMode(.large)
             .searchable(text: $library.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search title or book")
             .toolbar {
-                ToolbarItemGroup(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Menu {
                         Picker("Sort by", selection: $library.sort) {
                             ForEach(LibrarySort.allCases) { item in Text(item.title).tag(item) }
@@ -82,7 +82,7 @@ struct LibraryView: View {
                     exploreCard("Telegram", "New books", "paperplane.fill", .cyan, "https://t.me/TheBookR")
                     exploreCard("Discussion", "Reader community", "bubble.left.and.bubble.right.fill", .indigo, "https://t.me/+rUiqzi2mdhNiNGZl")
                     exploreCard("Website", "saroatsin.com", "globe", .green, "https://saroatsin.com")
-                    exploreCard("Reviews", "Book reviews", "book.pages.fill", .orange, "https://whispermmepub.github.io/Review/")
+                    exploreCard("Reviews", "Book reviews", "book.fill", .orange, "https://whispermmepub.github.io/Review/")
                 }
             }
         }
@@ -124,10 +124,19 @@ struct LibraryView: View {
             }
 
             if library.visibleBooks.isEmpty {
-                ContentUnavailableView(library.searchText.isEmpty ? "No books yet" : "No matching books",
-                                       systemImage: "books.vertical",
-                                       description: Text(library.searchText.isEmpty ? "Tap Add book to import EPUB or PDF files." : "Try another title or clear the search."))
-                    .frame(maxWidth: .infinity).padding(.vertical, 36)
+                VStack(spacing: 12) {
+                    Image(systemName: "books.vertical")
+                        .font(.system(size: 38, weight: .medium))
+                        .foregroundStyle(.secondary)
+                    Text(library.searchText.isEmpty ? "No books yet" : "No matching books")
+                        .font(.headline)
+                    Text(library.searchText.isEmpty ? "Tap Add book to import EPUB or PDF files." : "Try another title or clear the search.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 42)
             } else {
                 LazyVGrid(columns: columns, alignment: .leading, spacing: 22) {
                     ForEach(library.visibleBooks) { book in
